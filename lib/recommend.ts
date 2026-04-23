@@ -60,7 +60,11 @@ export function buildRecommendation(form: FormState): Recommendation {
     summary.push("Make changes slowly and favor highly digestible fiber sources.");
     adjustments.push("Keep meal sizes small and consistent.");
   }
-warnings.push("Review the full ration with your veterinarian if tying-up or exercise intolerance is present.");
+
+  if (symptoms.has("pssm")) {
+    summary.push("Prefer low-starch, low-sugar feed choices.");
+    adjustments.push("Use fat/fiber calories instead of sweet feed or high-starch grain.");
+    warnings.push("Review the full ration with your veterinarian if tying-up or exercise intolerance is present.");
   }
 
   if (symptoms.has("insulin")) {
@@ -99,6 +103,3 @@ warnings.push("Review the full ration with your veterinarian if tying-up or exer
     supplementGroups: horse.supplementGroups,
   };
 }
-  if (symptoms.has("pssm")) {
-    summary.push("Prefer low-starch, low-sugar feed choices.");
-    adjustments.push("Use fat/fiber calories instead of sweet feed or high-starch grain.");
