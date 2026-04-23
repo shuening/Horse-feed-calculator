@@ -40,3 +40,27 @@ A simple Next.js starter app for horse feeding guidance.
   - default symptoms: none
 
 ## Run locally
+bash
+npm install
+npm run dev
+Open:
+
+- http://localhost:3000
+
+## Build
+bash
+npm run build
+## Project structure
+text
+app/
+  layout.tsx
+  page.tsx
+lib/
+  horses.ts
+  recommend.ts
+package.json
+tsconfig.json
+next-env.d.ts
+## Notes
+
+This is a starter guidance tool only. It is not a diagnostic or veterinary tool.
