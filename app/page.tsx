@@ -12,36 +12,6 @@ const SYMPTOMS: { id: SymptomId; label: string }[] = [
   { id: "insulin", label: "Insulin concerns / easy keeper / laminitis risk" },
 ];
 
-const pageStyle: React.CSSProperties = {
-  maxWidth: 1100,
-  margin: "0 auto",
-  padding: 24,
-  fontFamily: "Arial, sans-serif",
-  color: "#1f2937",
-};
-
-const cardStyle: React.CSSProperties = {
-  border: "1px solid #e5e7eb",
-  borderRadius: 16,
-  padding: 20,
-  background: "#ffffff",
-  boxShadow: "0 8px 24px rgba(15, 23, 42, 0.06)",
-};
-
-const listStyle: React.CSSProperties = {
-  marginTop: 8,
-  paddingLeft: 20,
-  lineHeight: 1.5,
-};
-
-const groupCardStyle: React.CSSProperties = {
-  padding: 12,
-  borderRadius: 12,
-  background: "#f8fafc",
-  border: "1px solid #e5e7eb",
-  marginBottom: 12,
-};
-
 export default function HomePage() {
   const [horseId, setHorseId] = useState<HorseId>("tenor");
   const [goal, setGoal] = useState<Goal>(getHorseById("tenor").defaultGoal);
@@ -69,24 +39,24 @@ export default function HomePage() {
   }
 
   return (
-    <main style={pageStyle}>
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 36, marginBottom: 8 }}>Horse Feeding Instruction Helper</h1>
-        <p style={{ fontSize: 18, color: "#4b5563" }}>
+    <main className="page">
+      <div className="hero">
+        <h1>Horse Feeding Instruction Helper</h1>
+        <p>
           Barn version: cleaner notes, feeding suggestions, and supplements grouped by priority.
         </p>
       </div>
 
-      <section style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: 24, alignItems: "start" }}>
-        <div style={cardStyle}>
-          <h2 style={{ marginTop: 0 }}>Inputs</h2>
+      <section className="layoutGrid">
+        <div className="card inputsCard">
+          <h2>Inputs</h2>
 
-          <label style={{ display: "block", marginBottom: 18 }}>
-            <div style={{ marginBottom: 8, fontWeight: 700 }}>Horse</div>
+          <label className="fieldGroup">
+            <span className="fieldLabel">Horse</span>
             <select
               value={horseId}
               onChange={(e) => setHorseId(e.target.value as HorseId)}
-              style={{ width: "100%", padding: 12, borderRadius: 10, border: "1px solid #d1d5db" }}
+              className="selectInput"
             >
               {HORSES.map((horse) => (
                 <option key={horse.id} value={horse.id}>
@@ -96,130 +66,377 @@ export default function HomePage() {
             </select>
           </label>
 
-          <div style={{ marginBottom: 18, padding: 14, borderRadius: 12, background: "#f9fafb" }}>
-            <div style={{ fontWeight: 700, marginBottom: 8 }}>Selected horse baseline</div>
-            <ul style={listStyle}>
+          <div className="softPanel">
+            <div className="fieldLabel">Selected horse baseline</div>
+            <ul className="bulletList">
               {selectedHorse.notes.map((note) => (
                 <li key={note}>{note}</li>
               ))}
             </ul>
-</div>
-
-          <div style={{ marginBottom: 18 }}>
-            <div style={{ marginBottom: 8, fontWeight: 700 }}>Goal</div>
-            {([
-              ["gain", "Weight gain"],
-              ["maintain", "Maintain"],
-              ["lose", "Weight loss"],
-            ] as [Goal, string][]).map(([value, label]) => (
-              <label key={value} style={{ display: "block", marginBottom: 8 }}>
-                <input type="radio" checked={goal === value} onChange={() => setGoal(value)} /> {label}
-                {selectedHorse.defaultGoal === value ? " (default for this horse)" : ""}
-              </label>
-            ))}
           </div>
 
-          <div>
-            <div style={{ marginBottom: 8, fontWeight: 700 }}>Symptoms / constraints</div>
-            <p style={{ marginTop: 0, color: "#6b7280", fontSize: 14 }}>
+          <div className="fieldGroup">
+            <div className="fieldLabel">Goal</div>
+            <div className="optionStack">
+              {([
+                ["gain", "Weight gain"],
+                ["maintain", "Maintain"],
+                ["lose", "Weight loss"],
+              ] as [Goal, string][]).map(([value, label]) => (
+                <label key={value} className="optionRow">
+                  <input type="radio" checked={goal === value} onChange={() => setGoal(value)} />
+                  <span>
+                    {label}
+                    {selectedHorse.defaultGoal === value ? " (default for this horse)" : ""}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="fieldGroup">
+            <div className="fieldLabel">Symptoms / constraints</div>
+            <p className="helperText">
               Switching horses resets this list to that horse&apos;s default conditions.
             </p>
-            {SYMPTOMS.map((symptom) => {
-              const isDefault = selectedHorse.defaultSymptoms.includes(symptom.id);
-              return (
-                <label key={symptom.id} style={{ display: "block", marginBottom: 8 }}>
-                  <input
-                    type="checkbox"
-                    checked={symptoms.includes(symptom.id)}
-                    onChange={() => toggleSymptom(symptom.id)}
-                  />{" "}
-                  {symptom.label}
-                  {isDefault ? " (default)" : ""}
-                </label>
-              );
-            })}
+            <div className="optionStack">
+              {SYMPTOMS.map((symptom) => {
+                const isDefault = selectedHorse.defaultSymptoms.includes(symptom.id);
+                return (
+                  <label key={symptom.id} className="optionRow checkboxRow">
+                    <input
+                      type="checkbox"
+                      checked={symptoms.includes(symptom.id)}
+                      onChange={() => toggleSymptom(symptom.id)}
+                    />
+                    <span>
+                      {symptom.label}
+                      {isDefault ? " (default)" : ""}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
           </div>
         </div>
 
-        <div style={{ ...cardStyle, background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)" }}>
-          <h2 style={{ marginTop: 0 }}>Barn card</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12, marginBottom: 16 }}>
-            <div style={{ padding: 14, borderRadius: 12, background: "#eef2ff" }}>
-<div style={{ fontSize: 13, color: "#4338ca", fontWeight: 700 }}>Horse</div>
-              <div style={{ fontSize: 20, fontWeight: 700 }}>{recommendation.horseName}</div>
+        <div className="card resultsCard">
+          <h2>Barn card</h2>
+
+          <div className="summaryGrid">
+            <div className="statCard horseStat">
+              <div className="statLabel">Horse</div>
+              <div className="statValue">{recommendation.horseName}</div>
             </div>
-            <div style={{ padding: 14, borderRadius: 12, background: "#ecfeff" }}>
-              <div style={{ fontSize: 13, color: "#0f766e", fontWeight: 700 }}>Known weight</div>
-              <div style={{ fontSize: 20, fontWeight: 700 }}>{recommendation.weightLb} lb</div>
+            <div className="statCard weightStat">
+              <div className="statLabel">Known weight</div>
+              <div className="statValue">{recommendation.weightLb} lb</div>
             </div>
           </div>
 
-          <div style={{ padding: 14, borderRadius: 12, background: "#fefce8", marginBottom: 18 }}>
-            <div style={{ fontSize: 13, color: "#a16207", fontWeight: 700 }}>Starting forage target</div>
-            <div style={{ fontSize: 24, fontWeight: 700 }}>About {recommendation.forageLbPerDay} lb/day</div>
+          <div className="forageCard">
+            <div className="statLabel forageLabel">Starting forage target</div>
+            <div className="forageValue">About {recommendation.forageLbPerDay} lb/day</div>
           </div>
 
-          <h3>Horse notes</h3>
-          <ul style={listStyle}>
-            {recommendation.horseNotes.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
+          <section className="contentSection">
+            <h3>Horse notes</h3>
+            <ul className="bulletList">
+              {recommendation.horseNotes.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </section>
 
-          <h3>Baseline plan</h3>
-          <ul style={listStyle}>
-            {recommendation.baselinePlan.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
+          <section className="contentSection">
+            <h3>Baseline plan</h3>
+            <ul className="bulletList">
+              {recommendation.baselinePlan.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </section>
 
-          <h3>Feed</h3>
-          <ul style={listStyle}>
-            {recommendation.feedingSuggestion.map((item) => (
-              <li key={`${item.name}-${item.amount}`}>
-                <strong>{item.name}:</strong> {item.amount}
-                {item.note ? ` — ${item.note}` : ""}
-              </li>
-            ))}
-          </ul>
+          <section className="contentSection">
+            <h3>Feed</h3>
+            <ul className="bulletList">
+              {recommendation.feedingSuggestion.map((item) => (
+                <li key={`${item.name}-${item.amount}`}>
+                  <strong>{item.name}:</strong> {item.amount}
+                  {item.note ? ` — ${item.note}` : ""}
+                </li>
+              ))}
+            </ul>
+          </section>
 
-          <h3>Supplements</h3>
-          {recommendation.supplementGroups.map((group) => (
-            <div key={group.title} style={groupCardStyle}>
-              <div style={{ fontWeight: 700, marginBottom: 6 }}>{group.title}</div>
-              <ul style={{ ...listStyle, marginBottom: 0 }}>
-                {group.items.map((item) => ( 
-              <li key={`${group.title}-${item.name}-${item.amount}`}>
-                    <strong>{item.name}:</strong> {item.amount}
-                    {item.note ? ` — ${item.note}` : ""}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-
-          <h3>Summary</h3>
-          <ul style={listStyle}>
-            {recommendation.summary.map((item) => (
-              <li key={item}>{item}</li>
+          <section className="contentSection">
+            <h3>Supplements</h3>
+            {recommendation.supplementGroups.map((group) => (
+              <div key={group.title} className="groupCard">
+                <div className="groupTitle">{group.title}</div>
+                <ul className="bulletList compactList">
+                  {group.items.map((item) => (
+                    <li key={`${group.title}-${item.name}-${item.amount}`}>
+                      <strong>{item.name}:</strong> {item.amount}
+                      {item.note ? ` — ${item.note}` : ""}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
-          </ul>
+          </section>
 
-          <h3>Suggested adjustments</h3>
-          <ul style={listStyle}>
-            {recommendation.adjustments.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
+          <section className="contentSection">
+            <h3>Summary</h3>
+            <ul className="bulletList">
+              {recommendation.summary.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </section>
 
-          <h3>Warnings</h3>
-          <ul style={listStyle}>
-            {recommendation.warnings.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
+          <section className="contentSection">
+            <h3>Suggested adjustments</h3>
+            <ul className="bulletList">
+              {recommendation.adjustments.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="contentSection">
+            <h3>Warnings</h3>
+            <ul className="bulletList">
+              {recommendation.warnings.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </section>
         </div>
       </section>
+
+      <style jsx>{`
+        .page {
+          max-width: 1120px;
+          margin: 0 auto;
+          padding: 20px;
+          font-family: Arial, sans-serif;
+          color: #1f2937;
+        }
+
+        .hero {
+          margin-bottom: 24px;
+        }
+
+        .hero h1 {
+          margin: 0 0 8px;
+          font-size: clamp(2rem, 5vw, 2.4rem);
+          line-height: 1.1;
+        }
+
+        .hero p {
+          margin: 0;
+          font-size: clamp(1rem, 2.6vw, 1.125rem);
+          color: #4b5563;
+          line-height: 1.5;
+        }
+
+        .layoutGrid {
+          display: grid;
+          grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.15fr);
+          gap: 24px;
+          align-items: start;
+        }
+
+        .card {
+          min-width: 0;
+          border: 1px solid #e5e7eb;
+          border-radius: 18px;
+          padding: 20px;
+          background: #ffffff;
+          box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+        }
+
+        .resultsCard {
+          background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        }
+
+        .fieldGroup {
+          display: block;
+          margin-bottom: 18px;
+        }
+
+        .fieldLabel {
+          display: block;
+          margin-bottom: 8px;
+          font-weight: 700;
+        }
+
+        .selectInput {
+          width: 100%;
+          min-height: 48px;
+          padding: 12px 14px;
+          border-radius: 12px;
+          border: 1px solid #d1d5db;
+          font-size: 16px;
+          background: #fff;
+          color: #111827;
+        }
+
+        .softPanel {
+          margin-bottom: 18px;
+          padding: 14px;
+          border-radius: 12px;
+          background: #f9fafb;
+        }
+
+        .optionStack {
+          display: grid;
+          gap: 10px;
+        }
+
+        .optionRow {
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+          padding: 10px 12px;
+          border: 1px solid #e5e7eb;
+          border-radius: 12px;
+          background: #fff;
+          line-height: 1.45;
+        }
+
+        .optionRow input {
+          margin-top: 3px;
+          flex: 0 0 auto;
+        }
+
+        .helperText {
+          margin: 0 0 10px;
+          color: #6b7280;
+          font-size: 14px;
+          line-height: 1.5;
+        }
+
+        .summaryGrid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 12px;
+          margin-bottom: 16px;
+        }
+
+        .statCard {
+          padding: 14px;
+          border-radius: 12px;
+        }
+
+        .horseStat {
+          background: #eef2ff;
+        }
+
+        .weightStat {
+          background: #ecfeff;
+        }
+
+        .statLabel {
+          font-size: 13px;
+          font-weight: 700;
+          margin-bottom: 4px;
+        }
+
+        .horseStat .statLabel {
+          color: #4338ca;
+        }
+
+        .weightStat .statLabel {
+          color: #0f766e;
+        }
+
+        .statValue {
+          font-size: clamp(1.125rem, 3.4vw, 1.35rem);
+          font-weight: 700;
+          line-height: 1.2;
+          overflow-wrap: anywhere;
+        }
+
+        .forageCard {
+          padding: 14px;
+          border-radius: 12px;
+          background: #fefce8;
+          margin-bottom: 18px;
+        }
+
+        .forageLabel {
+          color: #a16207;
+        }
+
+        .forageValue {
+          font-size: clamp(1.35rem, 4vw, 1.6rem);
+          font-weight: 700;
+          line-height: 1.2;
+        }
+
+        .contentSection {
+          margin-top: 18px;
+        }
+
+        .contentSection h3 {
+          margin: 0 0 10px;
+        }
+
+        .bulletList {
+          margin: 8px 0 0;
+          padding-left: 20px;
+          line-height: 1.6;
+          overflow-wrap: anywhere;
+        }
+
+        .compactList {
+          margin-bottom: 0;
+        }
+
+        .groupCard {
+          padding: 12px;
+          border-radius: 12px;
+          background: #f8fafc;
+          border: 1px solid #e5e7eb;
+          margin-bottom: 12px;
+        }
+
+        .groupTitle {
+          font-weight: 700;
+          margin-bottom: 6px;
+        }
+
+        @media (max-width: 900px) {
+          .layoutGrid {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .page {
+            padding: 14px;
+          }
+
+          .card {
+            padding: 16px;
+            border-radius: 16px;
+          }
+
+          .summaryGrid {
+            grid-template-columns: 1fr;
+          }
+
+          .optionRow {
+            padding: 12px;
+          }
+
+          .bulletList {
+            padding-left: 18px;
+          }
+        }
+      `}</style>
     </main>
   );
 }
