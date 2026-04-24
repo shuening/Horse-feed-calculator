@@ -32,6 +32,8 @@ The app must let the user choose:
 - goal
 - symptoms / constraints
 
+User input must directly drive the suggested feed and supplements shown in the Barn card. When the user changes the selected horse, goal, or symptoms / constraints, the suggested feed and supplement recommendations must change accordingly.
+
 ### 4.1 Goal options
 - weight gain
 - maintain
@@ -41,8 +43,8 @@ The app must let the user choose:
 - poor teeth / trouble chewing
 - sensitive digestion / loose manure
 - not finishing feed
-- PSSM / tying-up risk
-- insulin concerns / easy keeper / laminitis risk
+- PSSM
+- insulin resistant
 
 ## 5. Core Behavior
 ### 5.1 Horse switching
@@ -121,8 +123,8 @@ When PSSM is checked, the app should:
 - reinforce low-starch / low-sugar feeding choices
 - show any relevant supplement or review target in the supplements section
 
-### 8.4 Insulin concerns
-When insulin concerns are checked, the app should:
+### 8.4 Insulin resistant
+When insulin resistant is checked, the app should:
 - make the plan more conservative where appropriate
 - reduce or limit richer bucket feed suggestions
 - prefer low-sugar carrier options
