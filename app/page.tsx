@@ -97,7 +97,8 @@ export default function HomePage() {
           <div className="fieldGroup">
             <div className="fieldLabel">Symptoms / constraints</div>
             <p className="helperText">
-              Switching horses resets this list to that horse&apos;s default conditions.
+              Switching horses resets this list to that horse&apos;s default conditions. Checked boxes now change
+              forage targets, feed amounts, and symptom-linked supplement suggestions in the barn card.
             </p>
             <div className="optionStack">
               {SYMPTOMS.map((symptom) => {
@@ -138,6 +139,17 @@ export default function HomePage() {
             <div className="statLabel forageLabel">Starting forage target</div>
             <div className="forageValue">About {recommendation.forageLbPerDay} lb/day</div>
           </div>
+
+          {recommendation.symptomLinkedChanges.length > 0 && (
+            <section className="contentSection">
+              <h3>Changes from checked symptoms</h3>
+              <ul className="bulletList">
+                {recommendation.symptomLinkedChanges.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           <section className="contentSection">
             <h3>Horse notes</h3>

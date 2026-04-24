@@ -1,4 +1,11 @@
-import { getHorseById, type Goal, type HorseId, type SymptomId } from "./horses";
+import {
+  getHorseById,
+  type FeedingItem,
+  type Goal,
+  type HorseId,
+  type SupplementGroup,
+  type SymptomId,
+} from "./horses";
 
 export type FormState = {
   horseId: HorseId;
@@ -15,24 +22,84 @@ export type Recommendation = {
   warnings: string[];
   horseNotes: string[];
   baselinePlan: string[];
-  feedingSuggestion: { name: string; amount: string; note?: string }[];
-  supplementGroups: { title: string; items: { name: string; amount: string; note?: string }[] }[];
+  feedingSuggestion: FeedingItem[];
+  supplementGroups: SupplementGroup[];
+  symptomLinkedChanges: string[];
 };
 
-function foragePercent(goal: Goal) {
+function baseForagePercent(goal: Goal) {
   if (goal === "lose") return 1.5;
   if (goal === "gain") return 2.0;
   return 1.8;
 }
 
+function cloneItems(items: FeedingItem[]) {
+  return items.map((item) => ({ ...item }));
+}
+
+function cloneGroups(groups: SupplementGroup[]) {
+  return groups.map((group) => ({
+    ...group,
+    items: cloneItems(group.items),
+  }));
+}
+
+function findItem(items: FeedingItem[], name: string) {
+  return items.find((item) => item.name === name);
+}
+
+function upsertItem(items: FeedingItem[], nextItem: FeedingItem) {
+  const existing = findItem(items, nextItem.name);
+  if (existing) {
+    existing.amount = nextItem.amount;
+    existing.note = nextItem.note;
+    return existing;
+  }
+
+  items.push({ ...nextItem });
+  return items[items.length - 1];
+}
+
+function findOrCreateGroup(groups: SupplementGroup[], title: string) {
+  const existing = groups.find((group) => group.title === title);
+  if (existing) return existing;
+
+  const group = { title, items: [] as FeedingItem[] };
+  groups.push(group);
+  return group;
+}
+
+function roundToTenth(value: number) {
+  return Math.round(value * 10) / 10;
+}
+
 export function buildRecommendation(form: FormState): Recommendation {
   const horse = getHorseById(form.horseId);
   const symptoms = new Set(form.symptoms);
-  const forageLb = (horse.weightLb * (foragePercent(form.goal) / 100)).toFixed(1);
+
+  let foragePercent = baseForagePercent(form.goal);
+  const symptomLinkedChanges: string[] = [];
+
+  if (symptoms.has("insulin")) {
+    const insulinAdjustedPercent =
+      form.goal === "gain" ? Math.min(foragePercent, 1.8) : Math.min(foragePercent, 1.7);
+
+    if (insulinAdjustedPercent !== foragePercent) {
+      foragePercent = insulinAdjustedPercent;
+      symptomLinkedChanges.push(
+        `Insulin concerns lower the starting forage target to ${foragePercent.toFixed(1)}% of body weight so calories stay more conservative.`
+      );
+    }
+  }
+
+  const forageLbNumber = roundToTenth(horse.weightLb * (foragePercent / 100));
+  const forageLb = forageLbNumber.toFixed(1);
 
   const summary: string[] = [];
   const adjustments: string[] = [];
   const warnings: string[] = [];
+  const feedingSuggestion = cloneItems(horse.feedingSuggestion);
+  const supplementGroups = cloneGroups(horse.supplementGroups);
 
   if (form.goal === "gain") {
     summary.push("Increase calories gradually with fiber- and fat-based feed choices.");
@@ -52,30 +119,102 @@ export function buildRecommendation(form: FormState): Recommendation {
   }
 
   if (symptoms.has("poor_teeth")) {
+    const mashAmount = `${roundToTenth(forageLbNumber * 0.35).toFixed(1)} lb/day`;
+    const hayCubeItem = upsertItem(feedingSuggestion, {
+      name: "Soaked hay cubes / mash forage",
+      amount: mashAmount,
+      note: "Replace part of the long-stem hay with a fully soaked forage mash if chewing drops off.",
+    });
+
+    const soakedCarrier = upsertItem(feedingSuggestion, {
+      name: "Soaked beet pulp / beet cubes",
+      amount: "1.0 lb/day dry equivalent",
+      note: "Use as an easy-chewing soaked fiber add-on when long-stem hay is being left behind.",
+    });
+
     summary.push("Use soaked senior feed or mash-friendly forage alternatives.");
     adjustments.push("Watch for quidding, slow eating, or choke risk.");
+    symptomLinkedChanges.push(
+      `Poor teeth adds ${hayCubeItem.amount} of soaked forage mash plus ${soakedCarrier.amount} of soaked beet pulp support.`
+    );
   }
 
   if (symptoms.has("sensitive_digestion")) {
+    const digestiveGroup = findOrCreateGroup(supplementGroups, "Symptom-driven support");
+    upsertItem(digestiveGroup.items, {
+      name: "Digestive support supplement",
+      amount: "2 oz/day",
+      note: "Choose one digestive-support product such as Assure Guard Gold or LMF Digest 911 and keep the rest of the ration steady for 10–14 days.",
+    });
+
+    const fiberCarrier = upsertItem(feedingSuggestion, {
+      name: "Soaked beet pulp / beet cubes",
+      amount: "0.5–1.0 lb/day dry equivalent",
+      note: "Small soaked fiber meals are often easier on the gut than a larger dry concentrate meal.",
+    });
+
     summary.push("Make changes slowly and favor highly digestible fiber sources.");
     adjustments.push("Keep meal sizes small and consistent.");
+    symptomLinkedChanges.push(
+      `Sensitive digestion adds a ${fiberCarrier.amount} soaked fiber carrier and a digestive-support supplement at 2 oz/day.`
+    );
   }
 
   if (symptoms.has("pssm")) {
+    const vitaminGroup = findOrCreateGroup(supplementGroups, "Symptom-driven support");
+    upsertItem(vitaminGroup.items, {
+      name: "Vitamin E review",
+      amount: "5,000 IU/day target to review",
+      note: "Confirm the actual dose with your veterinarian or nutritionist before changing a PSSM horse's vitamin E plan.",
+    });
+
+    const specialBlend = findItem(feedingSuggestion, "Haystack Special Blend");
+    if (specialBlend) {
+      specialBlend.note = `${specialBlend.note ? `${specialBlend.note} ` : ""}Keep the ration low-starch and avoid replacing this with sweet feed or grain.`;
+    }
+
     summary.push("Prefer low-starch, low-sugar feed choices.");
     adjustments.push("Use fat/fiber calories instead of sweet feed or high-starch grain.");
     warnings.push("Review the full ration with your veterinarian if tying-up or exercise intolerance is present.");
+    symptomLinkedChanges.push(
+      "PSSM keeps the ration in low-starch feed choices and adds a vitamin E review target in supplements."
+    );
   }
 
   if (symptoms.has("insulin")) {
+    const specialBlend = findItem(feedingSuggestion, "Haystack Special Blend");
+    if (specialBlend) {
+      specialBlend.amount = horse.id === "spoi" ? "0–0.5 lb/day" : "0–0.25 lb/day";
+      specialBlend.note = "Keep this minimal or skip it if the horse is easy-keeping or hay already covers calories.";
+    }
+
+    const lowSugarCarrier = upsertItem(feedingSuggestion, {
+      name: "Unmolassed beet pulp",
+      amount: "0.5 lb/day dry equivalent max",
+      note: "Only use as a low-sugar soaked carrier if needed for supplements.",
+    });
+
     summary.push("Choose low-NSC feed and be cautious with extra calories.");
     adjustments.push("If hay sugar is unknown, consider testing or soaking hay before making bigger feed changes.");
     warnings.push("If there is laminitis history or insulin dysregulation, confirm the plan with a veterinarian.");
+    symptomLinkedChanges.push(
+      `Insulin concerns cut rich bucket feed back and limit soaked carrier feed to ${lowSugarCarrier.amount}.`
+    );
   }
 
   if (symptoms.has("poor_appetite")) {
+    const appetiteGroup = findOrCreateGroup(supplementGroups, "Symptom-driven support");
+    upsertItem(appetiteGroup.items, {
+      name: "Palatable soaked carrier meal",
+      amount: "0.5–1.0 lb/day",
+      note: "Offer as 2–3 small soaked meals so supplements can be hidden in something more appetizing.",
+    });
+
     summary.push("Use palatable soaked meals and monitor how much is actually finished.");
     adjustments.push("Track refusals for several days before making big ration increases.");
+    symptomLinkedChanges.push(
+      "Poor appetite adds a small palatable soaked carrier meal so supplements and fiber can be split into easier-to-finish servings."
+    );
   }
 
   if (horse.id === "tenor") {
@@ -99,7 +238,8 @@ export function buildRecommendation(form: FormState): Recommendation {
     warnings,
     horseNotes: horse.notes,
     baselinePlan: horse.baselinePlan,
-    feedingSuggestion: horse.feedingSuggestion,
-    supplementGroups: horse.supplementGroups,
+    feedingSuggestion,
+    supplementGroups,
+    symptomLinkedChanges,
   };
 }
