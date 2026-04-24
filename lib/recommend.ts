@@ -17,6 +17,7 @@ export type Recommendation = {
   horseName: string;
   weightLb: number;
   forageLbPerDay: string;
+  feedTotalLbPerDay: string;
   summary: string[];
   adjustments: string[];
   warnings: string[];
@@ -73,6 +74,24 @@ function roundToTenth(value: number) {
   return Math.round(value * 10) / 10;
 }
 
+function parseLbAmount(amount: string) {
+  const match = amount.match(/^(\d+(?:\.\d+)?)\s*lb\/day( dry equivalent)?$/i);
+  if (!match) return null;
+
+  return {
+    poundsPerDay: Number(match[1]),
+    suffix: match[2] ?? "",
+  };
+}
+
+function formatLbAmount(value: number, suffix = "") {
+  return `${roundToTenth(value).toFixed(1)} lb/day${suffix}`;
+}
+
+function isConcreteFeedItem(item: FeedingItem) {
+  return parseLbAmount(item.amount) !== null;
+}
+
 export function buildRecommendation(form: FormState): Recommendation {
   const horse = getHorseById(form.horseId);
   const symptoms = new Set(form.symptoms);
@@ -98,13 +117,16 @@ export function buildRecommendation(form: FormState): Recommendation {
   const summary: string[] = [];
   const adjustments: string[] = [];
   const warnings: string[] = [];
-  const feedingSuggestion = cloneItems(horse.feedingSuggestion);
+  const feedingSuggestion = cloneItems(horse.feedingSuggestion).filter(
+    (item) => !item.amount.toLowerCase().startsWith("optional")
+  );
   const supplementGroups = cloneGroups(horse.supplementGroups);
 
   if (form.goal === "gain") {
     summary.push("Increase calories gradually with fiber- and fat-based feed choices.");
     adjustments.push("Split concentrate into 2–3 meals per day.");
     adjustments.push("Recheck body condition every 2 weeks so gain stays controlled.");
+    symptomLinkedChanges.push("Weight gain raises the concrete feed plan so the daily feed total matches the higher forage target.");
   }
 
   if (form.goal === "maintain") {
@@ -116,10 +138,11 @@ export function buildRecommendation(form: FormState): Recommendation {
     summary.push("Reduce excess calories while keeping forage as the foundation of the diet.");
     adjustments.push("Limit calorie-dense concentrates unless needed for nutrient balance.");
     adjustments.push("Track body condition and neck crest changes instead of cutting forage too aggressively.");
+    symptomLinkedChanges.push("Weight loss trims the concrete feed plan so the daily feed total lands on the leaner forage target.");
   }
 
   if (symptoms.has("poor_teeth")) {
-    const mashAmount = `${roundToTenth(forageLbNumber * 0.35).toFixed(1)} lb/day`;
+    const mashAmount = formatLbAmount(forageLbNumber * 0.35);
     const hayCubeItem = upsertItem(feedingSuggestion, {
       name: "Soaked hay cubes / mash forage",
       amount: mashAmount,
@@ -128,7 +151,7 @@ export function buildRecommendation(form: FormState): Recommendation {
 
     const soakedCarrier = upsertItem(feedingSuggestion, {
       name: "Soaked beet pulp / beet cubes",
-      amount: "1.0 lb/day dry equivalent",
+      amount: formatLbAmount(Math.max(forageLbNumber * 0.08, 0.8), " dry equivalent"),
       note: "Use as an easy-chewing soaked fiber add-on when long-stem hay is being left behind.",
     });
 
@@ -149,7 +172,7 @@ export function buildRecommendation(form: FormState): Recommendation {
 
     const fiberCarrier = upsertItem(feedingSuggestion, {
       name: "Soaked beet pulp / beet cubes",
-      amount: "0.5–1.0 lb/day dry equivalent",
+      amount: formatLbAmount(Math.max(forageLbNumber * 0.07, 0.8), " dry equivalent"),
       note: "Small soaked fiber meals are often easier on the gut than a larger dry concentrate meal.",
     });
 
@@ -184,13 +207,13 @@ export function buildRecommendation(form: FormState): Recommendation {
   if (symptoms.has("insulin")) {
     const specialBlend = findItem(feedingSuggestion, "Haystack Special Blend");
     if (specialBlend) {
-      specialBlend.amount = horse.id === "spoi" ? "0–0.5 lb/day" : "0–0.25 lb/day";
+      specialBlend.amount = formatLbAmount(horse.id === "spoi" ? 0.4 : 0.2);
       specialBlend.note = "Keep this minimal or skip it if the horse is easy-keeping or hay already covers calories.";
     }
 
     const lowSugarCarrier = upsertItem(feedingSuggestion, {
       name: "Unmolassed beet pulp",
-      amount: "0.5 lb/day dry equivalent max",
+      amount: formatLbAmount(0.5, " dry equivalent"),
       note: "Only use as a low-sugar soaked carrier if needed for supplements.",
     });
 
@@ -206,7 +229,7 @@ export function buildRecommendation(form: FormState): Recommendation {
     const appetiteGroup = findOrCreateGroup(supplementGroups, "Symptom-driven support");
     upsertItem(appetiteGroup.items, {
       name: "Palatable soaked carrier meal",
-      amount: "0.5–1.0 lb/day",
+      amount: formatLbAmount(Math.max(forageLbNumber * 0.06, 0.7)),
       note: "Offer as 2–3 small soaked meals so supplements can be hidden in something more appetizing.",
     });
 
@@ -216,6 +239,30 @@ export function buildRecommendation(form: FormState): Recommendation {
       "Poor appetite adds a small palatable soaked carrier meal so supplements and fiber can be split into easier-to-finish servings."
     );
   }
+
+  const scalableFeedItems = feedingSuggestion.filter(isConcreteFeedItem);
+  const currentFeedTotal = scalableFeedItems.reduce((sum, item) => {
+    const parsed = parseLbAmount(item.amount);
+    return sum + (parsed ? parsed.poundsPerDay : 0);
+  }, 0);
+
+  if (currentFeedTotal > 0) {
+    const scaleRatio = forageLbNumber / currentFeedTotal;
+
+    scalableFeedItems.forEach((item) => {
+      const parsed = parseLbAmount(item.amount);
+      if (!parsed) return;
+
+      item.amount = formatLbAmount(parsed.poundsPerDay * scaleRatio, parsed.suffix);
+    });
+  }
+
+  const feedTotalLbPerDay = scalableFeedItems
+    .reduce((sum, item) => {
+      const parsed = parseLbAmount(item.amount);
+      return sum + (parsed ? parsed.poundsPerDay : 0);
+    }, 0)
+    .toFixed(1);
 
   if (horse.id === "tenor") {
     summary.push("Tenor's baseline plan should account for senior needs, dental issues, and PSSM.");
@@ -233,6 +280,7 @@ export function buildRecommendation(form: FormState): Recommendation {
     horseName: horse.name,
     weightLb: horse.weightLb,
     forageLbPerDay: forageLb,
+    feedTotalLbPerDay,
     summary,
     adjustments,
     warnings,

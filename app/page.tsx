@@ -171,6 +171,10 @@ export default function HomePage() {
 
           <section className="contentSection">
             <h3>Feed</h3>
+            <p className="helperText sectionHelper">
+              Concrete feed total: about {recommendation.feedTotalLbPerDay} lb/day, matched to the current
+              forage target and goal.
+            </p>
             <ul className="bulletList">
               {recommendation.feedingSuggestion.map((item) => (
                 <li key={`${item.name}-${item.amount}`}>
@@ -328,6 +332,11 @@ export default function HomePage() {
           color: #6b7280;
           font-size: 14px;
           line-height: 1.5;
+        }
+
+        .sectionHelper {
+          margin-top: -2px;
+          margin-bottom: 10px;
         }
 
         .summaryGrid {
