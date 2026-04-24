@@ -44,7 +44,7 @@ User input must directly drive the suggested feed and supplements shown in the B
 - sensitive digestion / loose manure
 - not finishing feed
 - PSSM
-- insulin resistant
+- Insulin Resistant
 
 ## 5. Core Behavior
 ### 5.1 Horse switching
@@ -123,8 +123,8 @@ When PSSM is checked, the app should:
 - reinforce low-starch / low-sugar feeding choices
 - show any relevant supplement or review target in the supplements section
 
-### 8.4 Insulin resistant
-When insulin resistant is checked, the app should:
+### 8.4 Insulin Resistant
+When Insulin Resistant is checked, the app should:
 - make the plan more conservative where appropriate
 - reduce or limit richer bucket feed suggestions
 - prefer low-sugar carrier options
