@@ -8,8 +8,8 @@ const SYMPTOMS: { id: SymptomId; label: string }[] = [
   { id: "poor_teeth", label: "Poor teeth / trouble chewing" },
   { id: "sensitive_digestion", label: "Sensitive digestion / loose manure" },
   { id: "poor_appetite", label: "Not finishing feed" },
-  { id: "pssm", label: "PSSM / tying-up risk" },
-  { id: "insulin", label: "Insulin concerns / easy keeper / laminitis risk" },
+  { id: "pssm", label: "PSSM" },
+  { id: "insulin", label: "Insulin Resistant" },
 ];
 
 export default function HomePage() {
@@ -137,7 +137,7 @@ export default function HomePage() {
 
           <div className="forageCard">
             <div className="statLabel forageLabel">Starting forage target</div>
-            <div className="forageValue">About {recommendation.forageLbPerDay} lb/day</div>
+            <div className="forageValue">{recommendation.forageLbPerDay} lb/day</div>
           </div>
 
           {recommendation.symptomLinkedChanges.length > 0 && (
@@ -172,8 +172,8 @@ export default function HomePage() {
           <section className="contentSection">
             <h3>Feed</h3>
             <p className="helperText sectionHelper">
-              Concrete feed total: about {recommendation.feedTotalLbPerDay} lb/day, matched to the current
-              forage target and goal.
+              Concrete feed total: {recommendation.feedTotalLbPerDay} lb/day, matched to the current forage
+              target and goal.
             </p>
             <ul className="bulletList">
               {recommendation.feedingSuggestion.map((item) => (

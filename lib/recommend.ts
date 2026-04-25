@@ -70,6 +70,75 @@ function findOrCreateGroup(groups: SupplementGroup[], title: string) {
   return group;
 }
 
+function canonicalFeedName(name: string) {
+  const normalized = name.trim().toLowerCase();
+
+  if (
+    normalized === "timothy hay cubes" ||
+    normalized === "soaked hay cubes" ||
+    normalized === "soaked hay cubes / mash forage"
+  ) {
+    return "Soaked hay cubes";
+  }
+
+  if (
+    normalized === "beet pulp / beet cubes" ||
+    normalized === "soaked beet cubes" ||
+    normalized === "soaked beet pulp / beet cubes" ||
+    normalized === "unmolassed beet pulp"
+  ) {
+    return "Beet pulp / beet cubes";
+  }
+
+  return name;
+}
+
+function mergeNotes(currentNote?: string, nextNote?: string) {
+  const notes = [currentNote, nextNote]
+    .filter((note): note is string => Boolean(note?.trim()))
+    .map((note) => note.trim());
+
+  return Array.from(new Set(notes)).join(" ");
+}
+
+function consolidateEquivalentFeedItems(items: FeedingItem[]) {
+  const consolidated: FeedingItem[] = [];
+
+  items.forEach((item) => {
+    const canonicalName = canonicalFeedName(item.name);
+    const parsedAmount = parseLbAmount(item.amount);
+    const existing = consolidated.find((entry) => entry.name === canonicalName);
+
+    if (!existing) {
+      consolidated.push({
+        ...item,
+        name: canonicalName,
+      });
+      return;
+    }
+
+    existing.note = mergeNotes(existing.note, item.note) || undefined;
+
+    const existingParsed = parseLbAmount(existing.amount);
+    if (existingParsed && parsedAmount) {
+      const suffix = existingParsed.suffix || parsedAmount.suffix;
+      existing.amount = formatLbAmount(existingParsed.poundsPerDay + parsedAmount.poundsPerDay, suffix);
+      return;
+    }
+
+    if (!existingParsed && parsedAmount) {
+      existing.amount = item.amount;
+      return;
+    }
+
+    if (!existing.amount && item.amount) {
+      existing.amount = item.amount;
+    }
+  });
+
+  return consolidated;
+}
+
 function roundToTenth(value: number) {
   return Math.round(value * 10) / 10;
 }
@@ -106,7 +175,7 @@ export function buildRecommendation(form: FormState): Recommendation {
     if (insulinAdjustedPercent !== foragePercent) {
       foragePercent = insulinAdjustedPercent;
       symptomLinkedChanges.push(
-        `Insulin concerns lower the starting forage target to ${foragePercent.toFixed(1)}% of body weight so calories stay more conservative.`
+        `Insulin Resistant lowers the starting forage target to ${foragePercent.toFixed(1)}% of body weight so calories stay more conservative.`
       );
     }
   }
@@ -212,16 +281,16 @@ export function buildRecommendation(form: FormState): Recommendation {
     }
 
     const lowSugarCarrier = upsertItem(feedingSuggestion, {
-      name: "Unmolassed beet pulp",
+      name: "Beet pulp / beet cubes",
       amount: formatLbAmount(0.5, " dry equivalent"),
-      note: "Only use as a low-sugar soaked carrier if needed for supplements.",
+      note: "Use an unmolassed soaked version only if a low-sugar carrier is needed for supplements.",
     });
 
     summary.push("Choose low-NSC feed and be cautious with extra calories.");
     adjustments.push("If hay sugar is unknown, consider testing or soaking hay before making bigger feed changes.");
     warnings.push("If there is laminitis history or insulin dysregulation, confirm the plan with a veterinarian.");
     symptomLinkedChanges.push(
-      `Insulin concerns cut rich bucket feed back and limit soaked carrier feed to ${lowSugarCarrier.amount}.`
+      `Insulin Resistant cuts rich bucket feed back and limits soaked carrier feed to ${lowSugarCarrier.amount}.`
     );
   }
 
@@ -240,7 +309,8 @@ export function buildRecommendation(form: FormState): Recommendation {
     );
   }
 
-  const scalableFeedItems = feedingSuggestion.filter(isConcreteFeedItem);
+  const consolidatedFeedingSuggestion = consolidateEquivalentFeedItems(feedingSuggestion);
+  const scalableFeedItems = consolidatedFeedingSuggestion.filter(isConcreteFeedItem);
   const currentFeedTotal = scalableFeedItems.reduce((sum, item) => {
     const parsed = parseLbAmount(item.amount);
     return sum + (parsed ? parsed.poundsPerDay : 0);
@@ -248,12 +318,31 @@ export function buildRecommendation(form: FormState): Recommendation {
 
   if (currentFeedTotal > 0) {
     const scaleRatio = forageLbNumber / currentFeedTotal;
+    const scaledValues = scalableFeedItems.map((item) => {
+      const parsed = parseLbAmount(item.amount)!;
+      return {
+        item,
+        suffix: parsed.suffix,
+        scaled: parsed.poundsPerDay * scaleRatio,
+      };
+    });
 
-    scalableFeedItems.forEach((item) => {
-      const parsed = parseLbAmount(item.amount);
-      if (!parsed) return;
+    const roundedValues = scaledValues.map((entry) => roundToTenth(entry.scaled));
+    const roundedTotal = roundToTenth(roundedValues.reduce((sum, value) => sum + value, 0));
+    const difference = roundToTenth(forageLbNumber - roundedTotal);
 
-      item.amount = formatLbAmount(parsed.poundsPerDay * scaleRatio, parsed.suffix);
+    if (difference !== 0) {
+      let adjustmentIndex = 0;
+      scaledValues.forEach((entry, index) => {
+        if (entry.scaled > scaledValues[adjustmentIndex].scaled) {
+          adjustmentIndex = index;
+        }
+      });
+      roundedValues[adjustmentIndex] = roundToTenth(roundedValues[adjustmentIndex] + difference);
+    }
+
+    scaledValues.forEach((entry, index) => {
+      entry.item.amount = formatLbAmount(roundedValues[index], entry.suffix);
     });
   }
 
@@ -286,7 +375,7 @@ export function buildRecommendation(form: FormState): Recommendation {
     warnings,
     horseNotes: horse.notes,
     baselinePlan: horse.baselinePlan,
-    feedingSuggestion,
+    feedingSuggestion: consolidatedFeedingSuggestion,
     supplementGroups,
     symptomLinkedChanges,
   };

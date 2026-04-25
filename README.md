@@ -33,7 +33,7 @@ A simple Next.js starter app for horse feeding guidance.
 - Spoi
   - 950 lb
   - default goal: lose
-  - default symptoms: insulin concerns
+  - default symptoms: Insulin Resistant
 - Uffie
   - 800 lb
   - default goal: maintain

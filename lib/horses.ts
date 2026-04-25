@@ -106,7 +106,7 @@ export const HORSES: HorseProfile[] = [
     id: "spoi",
     name: "Spoi",
     weightLb: 950,
-    notes: ["Healthy adult", "A little overweight", "Possible insulin concerns"],
+    notes: ["Healthy adult", "A little overweight", "Possible insulin resistance"],
     defaultGoal: "lose",
     defaultSymptoms: ["insulin"],
     baselinePlan: [
