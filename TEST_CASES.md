@@ -211,7 +211,6 @@ This document maps the current `REQUIREMENT.md` into explicit manual test cases.
     - feed
     - supplements
     - summary
-    - symptom toggle section
     - suggested adjustments
     - warnings
 
@@ -510,39 +509,17 @@ This document maps the current `REQUIREMENT.md` into explicit manual test cases.
 
 ## 9. Explainability
 
-### TC-039 Symptom toggle section exists with correct name
+### TC-039 Symptom-driven output stays understandable without a separate section
 - Requirement reference: 9. Explainability
-- Objective: Verify the explainability section exists and is named correctly.
-- Preconditions:
-  - App is loaded.
-  - Select a state where at least one symptom change explanation is available.
-- Steps:
-  1. Review Barn card sections.
-- Expected result:
-  - A section named `Symptom toggle section` is present.
-
-### TC-040 Symptom toggle section explains changes in plain language
-- Requirement reference: 9. Explainability
-- Objective: Verify symptom-driven changes are explained clearly.
+- Objective: Verify symptom-related behavior remains understandable in plain language without requiring a separate Symptom toggle section.
 - Preconditions:
   - App is loaded.
   - At least one symptom is active.
 - Steps:
-  1. Read the Symptom toggle section.
+  1. Review Feed, Supplements, Summary, Suggested adjustments, and Warnings.
 - Expected result:
-  - The section explains what changed because of selected symptoms.
-  - The wording is plain language.
-
-### TC-041 Symptom toggle section appears after Summary
-- Requirement reference: 9. Explainability
-- Objective: Verify section order requirement.
-- Preconditions:
-  - App is loaded.
-  - At least one symptom explanation is available.
-- Steps:
-  1. Review order of Summary and Symptom toggle section.
-- Expected result:
-  - Symptom toggle section appears after Summary.
+  - Symptom-driven effects remain understandable in plain language.
+  - No separate Symptom toggle section is required.
 
 ---
 

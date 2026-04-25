@@ -118,12 +118,13 @@ describe('symptom-driven feeding logic', () => {
     expect(hayAmount).toBeGreaterThan(totalAmount / 2);
   });
 
-  it('adds a digestion-support supplement with an amount for sensitive digestion', () => {
+  it('adds Assure Guard Gold or LMF Digest 911 in supplements for sensitive digestion', () => {
     const recommendation = buildRecommendation({ horseId: 'tenor', goal: 'maintain', symptoms: ['sensitive_digestion'] });
     const supportGroup = recommendation.supplementGroups.find((group) => group.title === 'Symptom-driven support');
-    const supportItem = supportGroup?.items.find((item) => item.name === 'Digestive support supplement');
 
-    expect(supportItem?.amount).toBe('2 oz/day');
+    expect(
+      supportGroup?.items.some((item) => item.name === 'LMF Digest 911' || item.name === 'Assure Guard Gold')
+    ).toBe(true);
   });
 
   it('shifts poor-teeth horses toward soaked forage support', () => {

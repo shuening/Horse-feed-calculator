@@ -32,30 +32,23 @@ describe('HomePage UI requirements', () => {
     expect(screen.getByRole('checkbox', { name: /Insulin Resistant/i })).not.toBeChecked();
   });
 
-  it('shows the Barn card sections including Symptom toggle section after Summary', async () => {
-    const user = userEvent.setup();
+  it('does not show a separate Symptom toggle section in the Barn card', () => {
     render(<HomePage />);
 
-    await user.click(screen.getByRole('checkbox', { name: /Insulin Resistant/i }));
-
-    const headings = screen.getAllByRole('heading', { level: 3 }).map((heading) => heading.textContent);
-    const summaryIndex = headings.indexOf('Summary');
-    const symptomIndex = headings.indexOf('Symptom toggle section');
-
-    expect(summaryIndex).toBeGreaterThanOrEqual(0);
-    expect(symptomIndex).toBeGreaterThan(summaryIndex);
+    expect(screen.queryByRole('heading', { name: 'Symptom toggle section' })).not.toBeInTheDocument();
   });
 
-  it('updates the Symptom toggle section content immediately when a symptom is checked', async () => {
+  it('updates the Barn card immediately when a symptom is checked', async () => {
     const user = userEvent.setup();
     render(<HomePage />);
 
-    const symptomSection = screen.getByRole('heading', { name: 'Symptom toggle section' }).closest('section');
-    const initialContent = symptomSection?.textContent;
+    const feedHeading = screen.getByRole('heading', { name: 'Feed' });
+    const feedSection = feedHeading.closest('section');
+    const initialContent = feedSection?.textContent;
 
     await user.click(screen.getByRole('checkbox', { name: /Insulin Resistant/i }));
 
-    expect(symptomSection?.textContent).not.toBe(initialContent);
+    expect(feedSection?.textContent).not.toBe(initialContent);
   });
 
   it('shows all required Barn card content sections', async () => {
@@ -70,9 +63,9 @@ describe('HomePage UI requirements', () => {
     expect(screen.getByRole('heading', { name: 'Feed' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Supplements' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Summary' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Symptom toggle section' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Suggested adjustments' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Warnings' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Symptom toggle section' })).not.toBeInTheDocument();
   });
 
   it('changes feed and supplement output when inputs change', async () => {

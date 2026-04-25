@@ -68,7 +68,6 @@ The Barn card must show:
 - feed
 - supplements
 - summary
-- symptom toggle section
 - suggested adjustments
 - warnings
 
@@ -148,12 +147,7 @@ When poor appetite is checked, the app should:
 - include concrete amounts where possible
 
 ## 9. Explainability
-The Barn card must include a section named:
-- `Symptom toggle section`
-
-This section must explain what changed because of selected symptoms in plain language.
-
-The Symptom toggle section must appear after the Summary section in the Barn card.
+The app should keep symptom-driven output understandable in plain language within the relevant Barn card content, but it does not need a separate Symptom toggle section.
 
 ## 10. Mobile-Friendly Requirements
 The site must be usable on mobile devices.

@@ -70,6 +70,28 @@ function findOrCreateGroup(groups: SupplementGroup[], title: string) {
   return group;
 }
 
+function selectDigestiveSupportProduct(groups: SupplementGroup[]) {
+  const allItems = groups.flatMap((group) => group.items);
+  const preferredNames = ["LMF Digest 911", "Assure Guard Gold"];
+
+  for (const name of preferredNames) {
+    const match = allItems.find((item) => item.name === name);
+    if (match) {
+      return {
+        name: match.name,
+        amount: match.amount.includes("option") ? "2 oz/day" : match.amount,
+        note: match.note ?? "Use as the selected digestion-support product.",
+      };
+    }
+  }
+
+  return {
+    name: "LMF Digest 911",
+    amount: "2 oz/day",
+    note: "Use as the selected digestion-support product and keep the rest of the ration steady for 10–14 days.",
+  };
+}
+
 function canonicalFeedName(name: string) {
   const normalized = name.trim().toLowerCase();
 
@@ -233,10 +255,11 @@ export function buildRecommendation(form: FormState): Recommendation {
 
   if (symptoms.has("sensitive_digestion")) {
     const digestiveGroup = findOrCreateGroup(supplementGroups, "Symptom-driven support");
+    const digestiveProduct = selectDigestiveSupportProduct(supplementGroups);
     upsertItem(digestiveGroup.items, {
-      name: "Digestive support supplement",
-      amount: "2 oz/day",
-      note: "Choose one digestive-support product such as Assure Guard Gold or LMF Digest 911 and keep the rest of the ration steady for 10–14 days.",
+      name: digestiveProduct.name,
+      amount: digestiveProduct.amount,
+      note: digestiveProduct.note,
     });
 
     const fiberCarrier = upsertItem(feedingSuggestion, {
@@ -248,7 +271,7 @@ export function buildRecommendation(form: FormState): Recommendation {
     summary.push("Make changes slowly and favor highly digestible fiber sources.");
     adjustments.push("Keep meal sizes small and consistent.");
     symptomLinkedChanges.push(
-      `Sensitive digestion adds a ${fiberCarrier.amount} soaked fiber carrier and a digestive-support supplement at 2 oz/day.`
+      `Sensitive digestion adds ${digestiveProduct.name} in supplements plus a ${fiberCarrier.amount} soaked fiber carrier.`
     );
   }
 
