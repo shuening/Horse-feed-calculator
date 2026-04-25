@@ -140,17 +140,6 @@ export default function HomePage() {
             <div className="forageValue">{recommendation.forageLbPerDay} lb/day</div>
           </div>
 
-          {recommendation.symptomLinkedChanges.length > 0 && (
-            <section className="contentSection">
-              <h3>Changes from checked symptoms</h3>
-              <ul className="bulletList">
-                {recommendation.symptomLinkedChanges.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </section>
-          )}
-
           <section className="contentSection">
             <h3>Horse notes</h3>
             <ul className="bulletList">
@@ -210,6 +199,17 @@ export default function HomePage() {
               ))}
             </ul>
           </section>
+
+          {recommendation.symptomLinkedChanges.length > 0 && (
+            <section className="contentSection">
+              <h3>Symptom toggle section</h3>
+              <ul className="bulletList">
+                {recommendation.symptomLinkedChanges.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           <section className="contentSection">
             <h3>Suggested adjustments</h3>

@@ -309,6 +309,32 @@ export function buildRecommendation(form: FormState): Recommendation {
     );
   }
 
+  if (symptoms.has("poor_teeth") && symptoms.has("sensitive_digestion")) {
+    const soakedHayTarget = formatLbAmount(forageLbNumber * 0.72);
+    const soakedHayItem = upsertItem(feedingSuggestion, {
+      name: "Soaked hay cubes",
+      amount: soakedHayTarget,
+      note: "Use soaked hay cubes as the main food source when chewing is limited and the gut needs simpler soaked fiber meals.",
+    });
+
+    const specialBlend = findItem(feedingSuggestion, "Haystack Special Blend");
+    if (specialBlend) {
+      specialBlend.amount = formatLbAmount(Math.max(forageLbNumber * 0.08, 0.6));
+      specialBlend.note = "Keep this as a smaller support portion while most of the ration stays in soaked forage form.";
+    }
+
+    const soakedCarrier = upsertItem(feedingSuggestion, {
+      name: "Soaked beet pulp / beet cubes",
+      amount: formatLbAmount(Math.max(forageLbNumber * 0.06, 0.7), " dry equivalent"),
+      note: "Keep this as a smaller soaked fiber support, not the main calorie source, when both chewing and digestion are concerns.",
+    });
+
+    summary.push("When poor teeth and sensitive digestion overlap, lean mostly on soaked forage as the main feed source.");
+    symptomLinkedChanges.push(
+      `Poor teeth plus sensitive digestion shifts the ration mainly to soaked hay cubes (${soakedHayItem.amount}) with a smaller soaked beet pulp support at ${soakedCarrier.amount}.`
+    );
+  }
+
   const consolidatedFeedingSuggestion = consolidateEquivalentFeedItems(feedingSuggestion);
   const scalableFeedItems = consolidatedFeedingSuggestion.filter(isConcreteFeedItem);
   const currentFeedTotal = scalableFeedItems.reduce((sum, item) => {
