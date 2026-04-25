@@ -40,8 +40,8 @@ User input must directly drive the suggested feed and supplements shown in the B
 - weight loss
 
 ### 4.2 Symptom / constraint options
-- poor teeth / trouble chewing
-- sensitive digestion / loose manure
+- poor teeth
+- sensitive digestion
 - not finishing feed
 - PSSM
 - Insulin Resistant
