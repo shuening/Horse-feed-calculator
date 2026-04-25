@@ -87,8 +87,16 @@ Current baseline logic:
 When goal changes:
 - the concrete Feed section must recalculate
 - visible feed amounts must scale to the current forage target
-- the sum of concrete feed amounts must approximately match the current forage target
+- the amount of food shown in the Feed section must add up and match the Starting forage target
 - the app must show the daily concrete feed total in the Feed section
+- the Feed section must consolidate the same feed into one line instead of splitting equivalent names across multiple lines
+- equivalent feed names must be treated as the same feed for totals and display
+
+Examples of required consolidation:
+- Soaked hay cubes and Timothy hay cubes must be treated as the same feed
+- Beet pulp / beet cubes and soaked beet cubes must be treated as the same feed
+
+The app must check the final feed numbers and make sure there are no conflicts, duplicate counting problems, or mismatches between the Feed section total and the Starting forage target.
 
 The Feed section must not remain static when the goal changes.
 
