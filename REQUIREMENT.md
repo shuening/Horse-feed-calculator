@@ -63,12 +63,12 @@ The Barn card must show:
 - horse name
 - known weight
 - starting forage target
-- changes from checked symptoms
 - horse notes
 - baseline plan
 - feed
 - supplements
 - summary
+- symptom toggle section
 - suggested adjustments
 - warnings
 
@@ -107,12 +107,16 @@ Placeholder-only optional lines should not be treated as part of the concrete da
 ## 8. Symptom-Driven Feeding Logic
 Symptom checkboxes must affect visible feeding output, not just summary text.
 
+When a symptom is checked or unchecked, the feed suggestion must update immediately and continue to match the active symptom requirements.
+
 When a symptom is checked, the Barn card must show the consequence in one or more of these:
 - starting forage target
 - feed amounts
 - feed types
 - supplement suggestions
 - supplement amounts
+
+When symptoms combine, the feed suggestion must reflect the combined requirements without conflicts. For example, if a horse has poor teeth and sensitive digestion, the feed suggestion should rely mainly on soaked hay cubes or other soaked easy-to-chew fiber sources as the main food source.
 
 ### 8.1 Sensitive digestion
 When sensitive digestion is checked, the app must:
@@ -145,9 +149,11 @@ When poor appetite is checked, the app should:
 
 ## 9. Explainability
 The Barn card must include a section named:
-- `Changes from checked symptoms`
+- `Symptom toggle section`
 
 This section must explain what changed because of selected symptoms in plain language.
+
+The Symptom toggle section must appear after the Summary section in the Barn card.
 
 ## 10. Mobile-Friendly Requirements
 The site must be usable on mobile devices.
