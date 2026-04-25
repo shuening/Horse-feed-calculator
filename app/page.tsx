@@ -5,8 +5,8 @@ import { HORSES, getHorseById, type Goal, type HorseId, type SymptomId } from ".
 import { buildRecommendation } from "../lib/recommend";
 
 const SYMPTOMS: { id: SymptomId; label: string }[] = [
-  { id: "poor_teeth", label: "Poor teeth / trouble chewing" },
-  { id: "sensitive_digestion", label: "Sensitive digestion / loose manure" },
+  { id: "poor_teeth", label: "Poor teeth" },
+  { id: "sensitive_digestion", label: "Sensitive digestion" },
   { id: "poor_appetite", label: "Not finishing feed" },
   { id: "pssm", label: "PSSM" },
   { id: "insulin", label: "Insulin Resistant" },
