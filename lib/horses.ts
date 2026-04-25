@@ -76,8 +76,8 @@ export const HORSES: HorseProfile[] = [
       { name: "Grass hay", amount: "8 lb/day", note: "About 2.7 lb per meal if split into 3 meals." },
       { name: "Alfalfa", amount: "3 lb/day", note: "About 1.0 lb per meal if split into 3 meals." },
       { name: "Haystack Special Blend", amount: "0.5 lb/day", note: "About 0.17 lb per meal if split into 3 meals." },
-      { name: "Timothy hay cubes", amount: "Optional partial swap for hay", note: "Only if you want a soaked forage meal component." },
-      { name: "Beet pulp / beet cubes", amount: "Optional small soaked carrier", note: "Use only if needed for mixing feed." },
+      { name: "Timothy hay cubes", amount: "Optional partial swap for hay", note: "Use when you want a soaked forage meal component." },
+      { name: "Beet pulp / beet cubes", amount: "Optional small soaked carrier", note: "Use for mixing feed when a soaked carrier helps." },
     ],
     supplementGroups: [
       {
@@ -105,7 +105,7 @@ export const HORSES: HorseProfile[] = [
       { name: "Grass hay", amount: "8 lb/day", note: "About 2.7 lb per meal if split into 3 meals. Test or soak hay if sugar is unknown." },
       { name: "Alfalfa", amount: "6 lb/day", note: "About 2.0 lb per meal if split into 3 meals." },
       { name: "Haystack Special Blend", amount: "1.0 lb/day", note: "About 0.33 lb per meal. Reduce first if extra calories are not needed." },
-      { name: "Beet pulp / beet cubes", amount: "Optional 1.0 lb/day dry equivalent", note: "Only if needed as a soaked fiber carrier." },
+      { name: "Beet pulp / beet cubes", amount: "Optional 1.0 lb/day dry equivalent", note: "Use as a soaked fiber carrier when appropriate." },
     ],
     supplementGroups: [
       {
