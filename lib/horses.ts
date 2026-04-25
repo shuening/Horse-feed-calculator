@@ -58,14 +58,7 @@ export const HORSES: HorseProfile[] = [
           { name: "Plain loose salt", amount: "1–2 oz/day", note: "Keep fresh water and free-choice loose salt available." },
         ],
       },
-      {
-        title: "Only if needed",
-        items: [
-          { name: "Assure Guard Gold", amount: "Digestive-support option", note: "Useful if digestive stress is a frequent problem." },
-          { name: "LMF Digest 911", amount: "Alternative digestive-support option", note: "Use instead of another digestive aid, not automatically with it." },
-          { name: "Vitamin E / selenium review", amount: "Vet/ration check", note: "Worth reviewing because Tenor has PSSM and a more complicated ration." },
-        ],
-      },
+
     ],
   },
   {
@@ -94,12 +87,7 @@ export const HORSES: HorseProfile[] = [
           { name: "Plain loose salt", amount: "1–2 oz/day", note: "Or provide free-choice loose salt." },
         ],
       },
-      {
-        title: "Only if needed",
-        items: [
-          { name: "Purina SuperSport Amino Acid Supplement", amount: "Only if workload/performance demands it", note: "Helpful for muscle and performance support, not needed for simple maintenance." },
-          ],
-      },
+
     ],
   },
   {
@@ -133,12 +121,7 @@ export const HORSES: HorseProfile[] = [
           { name: "Triple Crown Balancer Gold", amount: "Use instead of AminoTrace+ if preferred", note: "Do not stack both full mineral bases unless the whole ration is reviewed." },
         ],
       },
-      {
-        title: "Only if needed",
-        items: [
-          { name: "Assure Guard Gold", amount: "Digestive-support option", note: "Use only if digestive problems also need support." },
-        ],
-      },
+
     ],
   },
   {
@@ -167,12 +150,7 @@ export const HORSES: HorseProfile[] = [
           { name: "Plain loose salt", amount: "1–2 oz/day", note: "Or provide free-choice loose salt." },
         ],
       },
-      {
-        title: "Only if needed",
-        items: [
-          { name: "Purina SuperSport Amino Acid Supplement", amount: "Only if workload/performance demands it", note: "More useful for harder work than routine maintenance." },
-        ],
-      },
+
     ],
   },
 ];
